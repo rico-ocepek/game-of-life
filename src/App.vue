@@ -54,7 +54,7 @@ const selectPreset = () => {
 };
 
 onMounted(() => {
-  game = new Game(50, 100);
+  game = new Game(40, 50);
 
   tick();
 });
@@ -95,7 +95,7 @@ onMounted(() => {
     >
       <div
         v-for="(cellState, colIndex) in row"
-        class="cursor-pointer rounded aspect-square flex-grow"
+        class="cursor-pointer rounded-xs aspect-square flex-grow"
         :class="cellState ? 'bg-neutral-700 text-white' : 'bg-neutral-200'"
         @click="toggleCellState(rowIndex, colIndex)"
       >
