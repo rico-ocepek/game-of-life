@@ -9,6 +9,7 @@ const state = reactive<{
   tickNumber: number;
   running: boolean;
   selectedPreset: AvailablePresets | null;
+  timeout: number;
   presetOptions: AvailablePresets[];
 }>({
   tickNumber: 0,
