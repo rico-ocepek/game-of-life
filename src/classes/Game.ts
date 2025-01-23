@@ -1,3 +1,10 @@
+export type AvailablePresets =
+  | "glider-gun"
+  | "glider"
+  | "blinker"
+  | "pentadecathlon"
+  | "symmetrical-oscillator";
+
 export default class Game {
   rowCount: number;
   colCount: number;
@@ -120,6 +127,155 @@ export default class Game {
     }
 
     return false;
+  }
+
+  loadPreset(preset: AvailablePresets) {
+    this._initializeCells();
+
+    switch (preset) {
+      case "pentadecathlon":
+        this.cellStates[5][4] = true;
+
+        this.cellStates[6][3] = true;
+        this.cellStates[6][5] = true;
+
+        this.cellStates[7][3] = true;
+        this.cellStates[7][5] = true;
+
+        this.cellStates[8][4] = true;
+
+        this.cellStates[9][4] = true;
+
+        this.cellStates[10][3] = true;
+        this.cellStates[10][5] = true;
+
+        this.cellStates[11][3] = true;
+        this.cellStates[11][5] = true;
+
+        this.cellStates[12][4] = true;
+        break;
+
+      case "glider-gun":
+        this.cellStates[1][26] = true;
+
+        this.cellStates[2][24] = true;
+        this.cellStates[2][26] = true;
+
+        this.cellStates[3][14] = true;
+        this.cellStates[3][15] = true;
+        this.cellStates[3][22] = true;
+        this.cellStates[3][23] = true;
+        this.cellStates[3][36] = true;
+        this.cellStates[3][37] = true;
+
+        this.cellStates[4][13] = true;
+        this.cellStates[4][17] = true;
+        this.cellStates[4][22] = true;
+        this.cellStates[4][23] = true;
+        this.cellStates[4][36] = true;
+        this.cellStates[4][37] = true;
+
+        this.cellStates[5][2] = true;
+        this.cellStates[5][3] = true;
+        this.cellStates[5][12] = true;
+        this.cellStates[5][18] = true;
+        this.cellStates[5][22] = true;
+        this.cellStates[5][23] = true;
+
+        this.cellStates[6][2] = true;
+        this.cellStates[6][3] = true;
+        this.cellStates[6][12] = true;
+        this.cellStates[6][16] = true;
+        this.cellStates[6][18] = true;
+        this.cellStates[6][19] = true;
+        this.cellStates[6][24] = true;
+        this.cellStates[6][26] = true;
+
+        this.cellStates[7][12] = true;
+        this.cellStates[7][18] = true;
+        this.cellStates[7][26] = true;
+
+        this.cellStates[8][13] = true;
+        this.cellStates[8][17] = true;
+
+        this.cellStates[9][14] = true;
+        this.cellStates[9][15] = true;
+        break;
+
+      case "symmetrical-oscillator":
+        this.cellStates[2][4] = true;
+        this.cellStates[2][5] = true;
+        this.cellStates[2][6] = true;
+        this.cellStates[2][10] = true;
+        this.cellStates[2][11] = true;
+        this.cellStates[2][12] = true;
+
+        this.cellStates[4][2] = true;
+        this.cellStates[4][7] = true;
+        this.cellStates[4][9] = true;
+        this.cellStates[4][14] = true;
+
+        this.cellStates[5][2] = true;
+        this.cellStates[5][7] = true;
+        this.cellStates[5][9] = true;
+        this.cellStates[5][14] = true;
+
+        this.cellStates[6][2] = true;
+        this.cellStates[6][7] = true;
+        this.cellStates[6][9] = true;
+        this.cellStates[6][14] = true;
+
+        this.cellStates[7][4] = true;
+        this.cellStates[7][5] = true;
+        this.cellStates[7][6] = true;
+        this.cellStates[7][10] = true;
+        this.cellStates[7][11] = true;
+        this.cellStates[7][12] = true;
+
+        this.cellStates[9][4] = true;
+        this.cellStates[9][5] = true;
+        this.cellStates[9][6] = true;
+        this.cellStates[9][10] = true;
+        this.cellStates[9][11] = true;
+        this.cellStates[9][12] = true;
+
+        this.cellStates[10][2] = true;
+        this.cellStates[10][7] = true;
+        this.cellStates[10][9] = true;
+        this.cellStates[10][14] = true;
+
+        this.cellStates[11][2] = true;
+        this.cellStates[11][7] = true;
+        this.cellStates[11][9] = true;
+        this.cellStates[11][14] = true;
+
+        this.cellStates[12][2] = true;
+        this.cellStates[12][7] = true;
+        this.cellStates[12][9] = true;
+        this.cellStates[12][14] = true;
+
+        this.cellStates[14][4] = true;
+        this.cellStates[14][5] = true;
+        this.cellStates[14][6] = true;
+        this.cellStates[14][10] = true;
+        this.cellStates[14][11] = true;
+        this.cellStates[14][12] = true;
+        break;
+
+      case "glider":
+        this.cellStates[1][2] = true;
+        this.cellStates[2][3] = true;
+        this.cellStates[3][1] = true;
+        this.cellStates[3][2] = true;
+        this.cellStates[3][3] = true;
+        break;
+
+      case "blinker":
+        this.cellStates[1][2] = true;
+        this.cellStates[2][2] = true;
+        this.cellStates[3][2] = true;
+        break;
+    }
   }
 
   toggleCellState(rowIndex: number, colIndex: number) {
