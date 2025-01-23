@@ -5,23 +5,32 @@ export type AvailablePresets =
   | "pentadecathlon"
   | "symmetrical-oscillator";
 
+export type CellIdentifier = {
+  rowIndex: number;
+  colIndex: number;
+};
+
 export default class Game {
   rowCount: number;
   colCount: number;
 
   cellStates: boolean[][];
 
+  _updatedCells: CellIdentifier[];
+
   constructor(rowCount: number, colCount: number) {
     this.rowCount = rowCount;
     this.colCount = colCount;
 
     this.cellStates = [];
+    this._updatedCells = [];
 
     this._initializeCells();
   }
 
   _initializeCells() {
     this.cellStates = [];
+    this._updatedCells = [];
 
     for (let i = 0; i < this.rowCount; i++) {
       this.cellStates[i] = [];
@@ -32,9 +41,55 @@ export default class Game {
     }
   }
 
-  _countActiveNeighbourCells(rowIndex: number, colIndex: number) {
-    let activeNeighbours = 0;
+  _calculateCellsToUpdate(): CellIdentifier[] {
+    const cellsToUpdate: Set<string> = new Set();
 
+    this._updatedCells.forEach((cell) => {
+      // update the cell itself
+      cellsToUpdate.add(cell.rowIndex + "|" + cell.colIndex);
+
+      // and all neighbouring cells
+      const adjacentBandIndices = this._getAdjacentBandIndices(
+        cell.rowIndex,
+        cell.colIndex
+      );
+
+      cellsToUpdate.add(adjacentBandIndices.top + "|" + cell.colIndex);
+
+      cellsToUpdate.add(
+        adjacentBandIndices.top + "|" + adjacentBandIndices.right
+      );
+
+      cellsToUpdate.add(cell.rowIndex + "|" + adjacentBandIndices.right);
+
+      cellsToUpdate.add(
+        adjacentBandIndices.bottom + "|" + adjacentBandIndices.right
+      );
+
+      cellsToUpdate.add(adjacentBandIndices.bottom + "|" + cell.colIndex);
+
+      cellsToUpdate.add(
+        adjacentBandIndices.bottom + "|" + adjacentBandIndices.left
+      );
+
+      cellsToUpdate.add(cell.rowIndex + "|" + adjacentBandIndices.left);
+
+      cellsToUpdate.add(
+        adjacentBandIndices.top + "|" + adjacentBandIndices.left
+      );
+    });
+
+    return [...cellsToUpdate].map((cellString) => {
+      const cellCoordinates = cellString.split("|");
+
+      return {
+        rowIndex: parseInt(cellCoordinates[0]),
+        colIndex: parseInt(cellCoordinates[1]),
+      };
+    });
+  }
+
+  _getAdjacentBandIndices(rowIndex: number, colIndex: number) {
     let adjacentBandIndices = {
       top: rowIndex - 1,
       bottom: rowIndex + 1,
@@ -53,6 +108,17 @@ export default class Game {
     } else if (colIndex === this.colCount - 1) {
       adjacentBandIndices.right = 0;
     }
+
+    return adjacentBandIndices;
+  }
+
+  _countActiveNeighbourCells(rowIndex: number, colIndex: number) {
+    let activeNeighbours = 0;
+
+    const adjacentBandIndices = this._getAdjacentBandIndices(
+      rowIndex,
+      colIndex
+    );
 
     // check top neighbour
     if (this.cellStates[adjacentBandIndices.top][colIndex]) {
@@ -129,182 +195,207 @@ export default class Game {
     return false;
   }
 
+  _updateCellState(rowIndex: number, colIndex: number, newState: boolean) {
+    const oldState = this.cellStates[rowIndex][colIndex];
+
+    this.cellStates[rowIndex][colIndex] = newState;
+
+    if (oldState === newState) {
+      return;
+    }
+
+    this._updatedCells.push({
+      rowIndex,
+      colIndex,
+    });
+  }
+
   loadPreset(preset: AvailablePresets) {
     this._initializeCells();
 
     switch (preset) {
       case "pentadecathlon":
-        this.cellStates[5][4] = true;
+        this._updateCellState(5, 4, true);
 
-        this.cellStates[6][3] = true;
-        this.cellStates[6][5] = true;
+        this._updateCellState(6, 3, true);
+        this._updateCellState(6, 5, true);
 
-        this.cellStates[7][3] = true;
-        this.cellStates[7][5] = true;
+        this._updateCellState(7, 3, true);
+        this._updateCellState(7, 5, true);
 
-        this.cellStates[8][4] = true;
+        this._updateCellState(8, 4, true);
 
-        this.cellStates[9][4] = true;
+        this._updateCellState(9, 4, true);
 
-        this.cellStates[10][3] = true;
-        this.cellStates[10][5] = true;
+        this._updateCellState(10, 3, true);
+        this._updateCellState(10, 5, true);
 
-        this.cellStates[11][3] = true;
-        this.cellStates[11][5] = true;
+        this._updateCellState(11, 3, true);
+        this._updateCellState(11, 5, true);
 
-        this.cellStates[12][4] = true;
+        this._updateCellState(12, 4, true);
         break;
 
       case "glider-gun":
-        this.cellStates[1][26] = true;
+        this._updateCellState(1, 26, true);
 
-        this.cellStates[2][24] = true;
-        this.cellStates[2][26] = true;
+        this._updateCellState(2, 24, true);
+        this._updateCellState(2, 26, true);
 
-        this.cellStates[3][14] = true;
-        this.cellStates[3][15] = true;
-        this.cellStates[3][22] = true;
-        this.cellStates[3][23] = true;
-        this.cellStates[3][36] = true;
-        this.cellStates[3][37] = true;
+        this._updateCellState(3, 14, true);
+        this._updateCellState(3, 15, true);
+        this._updateCellState(3, 22, true);
+        this._updateCellState(3, 23, true);
+        this._updateCellState(3, 36, true);
+        this._updateCellState(3, 37, true);
 
-        this.cellStates[4][13] = true;
-        this.cellStates[4][17] = true;
-        this.cellStates[4][22] = true;
-        this.cellStates[4][23] = true;
-        this.cellStates[4][36] = true;
-        this.cellStates[4][37] = true;
+        this._updateCellState(4, 13, true);
+        this._updateCellState(4, 17, true);
+        this._updateCellState(4, 22, true);
+        this._updateCellState(4, 23, true);
+        this._updateCellState(4, 36, true);
+        this._updateCellState(4, 37, true);
 
-        this.cellStates[5][2] = true;
-        this.cellStates[5][3] = true;
-        this.cellStates[5][12] = true;
-        this.cellStates[5][18] = true;
-        this.cellStates[5][22] = true;
-        this.cellStates[5][23] = true;
+        this._updateCellState(5, 2, true);
+        this._updateCellState(5, 3, true);
+        this._updateCellState(5, 12, true);
+        this._updateCellState(5, 18, true);
+        this._updateCellState(5, 22, true);
+        this._updateCellState(5, 23, true);
 
-        this.cellStates[6][2] = true;
-        this.cellStates[6][3] = true;
-        this.cellStates[6][12] = true;
-        this.cellStates[6][16] = true;
-        this.cellStates[6][18] = true;
-        this.cellStates[6][19] = true;
-        this.cellStates[6][24] = true;
-        this.cellStates[6][26] = true;
+        this._updateCellState(6, 2, true);
+        this._updateCellState(6, 3, true);
+        this._updateCellState(6, 12, true);
+        this._updateCellState(6, 16, true);
+        this._updateCellState(6, 18, true);
+        this._updateCellState(6, 19, true);
+        this._updateCellState(6, 24, true);
+        this._updateCellState(6, 26, true);
 
-        this.cellStates[7][12] = true;
-        this.cellStates[7][18] = true;
-        this.cellStates[7][26] = true;
+        this._updateCellState(7, 12, true);
+        this._updateCellState(7, 18, true);
+        this._updateCellState(7, 26, true);
 
-        this.cellStates[8][13] = true;
-        this.cellStates[8][17] = true;
+        this._updateCellState(8, 13, true);
+        this._updateCellState(8, 17, true);
 
-        this.cellStates[9][14] = true;
-        this.cellStates[9][15] = true;
+        this._updateCellState(9, 14, true);
+        this._updateCellState(9, 15, true);
         break;
 
       case "symmetrical-oscillator":
-        this.cellStates[2][4] = true;
-        this.cellStates[2][5] = true;
-        this.cellStates[2][6] = true;
-        this.cellStates[2][10] = true;
-        this.cellStates[2][11] = true;
-        this.cellStates[2][12] = true;
+        this._updateCellState(2, 4, true);
+        this._updateCellState(2, 5, true);
+        this._updateCellState(2, 6, true);
+        this._updateCellState(2, 10, true);
+        this._updateCellState(2, 11, true);
+        this._updateCellState(2, 12, true);
 
-        this.cellStates[4][2] = true;
-        this.cellStates[4][7] = true;
-        this.cellStates[4][9] = true;
-        this.cellStates[4][14] = true;
+        this._updateCellState(4, 2, true);
+        this._updateCellState(4, 7, true);
+        this._updateCellState(4, 9, true);
+        this._updateCellState(4, 14, true);
 
-        this.cellStates[5][2] = true;
-        this.cellStates[5][7] = true;
-        this.cellStates[5][9] = true;
-        this.cellStates[5][14] = true;
+        this._updateCellState(5, 2, true);
+        this._updateCellState(5, 7, true);
+        this._updateCellState(5, 9, true);
+        this._updateCellState(5, 14, true);
 
-        this.cellStates[6][2] = true;
-        this.cellStates[6][7] = true;
-        this.cellStates[6][9] = true;
-        this.cellStates[6][14] = true;
+        this._updateCellState(6, 2, true);
+        this._updateCellState(6, 7, true);
+        this._updateCellState(6, 9, true);
+        this._updateCellState(6, 14, true);
 
-        this.cellStates[7][4] = true;
-        this.cellStates[7][5] = true;
-        this.cellStates[7][6] = true;
-        this.cellStates[7][10] = true;
-        this.cellStates[7][11] = true;
-        this.cellStates[7][12] = true;
+        this._updateCellState(7, 4, true);
+        this._updateCellState(7, 5, true);
+        this._updateCellState(7, 6, true);
+        this._updateCellState(7, 10, true);
+        this._updateCellState(7, 11, true);
+        this._updateCellState(7, 12, true);
 
-        this.cellStates[9][4] = true;
-        this.cellStates[9][5] = true;
-        this.cellStates[9][6] = true;
-        this.cellStates[9][10] = true;
-        this.cellStates[9][11] = true;
-        this.cellStates[9][12] = true;
+        this._updateCellState(9, 4, true);
+        this._updateCellState(9, 5, true);
+        this._updateCellState(9, 6, true);
+        this._updateCellState(9, 10, true);
+        this._updateCellState(9, 11, true);
+        this._updateCellState(9, 12, true);
 
-        this.cellStates[10][2] = true;
-        this.cellStates[10][7] = true;
-        this.cellStates[10][9] = true;
-        this.cellStates[10][14] = true;
+        this._updateCellState(10, 2, true);
+        this._updateCellState(10, 7, true);
+        this._updateCellState(10, 9, true);
+        this._updateCellState(10, 14, true);
 
-        this.cellStates[11][2] = true;
-        this.cellStates[11][7] = true;
-        this.cellStates[11][9] = true;
-        this.cellStates[11][14] = true;
+        this._updateCellState(11, 2, true);
+        this._updateCellState(11, 7, true);
+        this._updateCellState(11, 9, true);
+        this._updateCellState(11, 14, true);
 
-        this.cellStates[12][2] = true;
-        this.cellStates[12][7] = true;
-        this.cellStates[12][9] = true;
-        this.cellStates[12][14] = true;
+        this._updateCellState(12, 2, true);
+        this._updateCellState(12, 7, true);
+        this._updateCellState(12, 9, true);
+        this._updateCellState(12, 14, true);
 
-        this.cellStates[14][4] = true;
-        this.cellStates[14][5] = true;
-        this.cellStates[14][6] = true;
-        this.cellStates[14][10] = true;
-        this.cellStates[14][11] = true;
-        this.cellStates[14][12] = true;
+        this._updateCellState(14, 4, true);
+        this._updateCellState(14, 5, true);
+        this._updateCellState(14, 6, true);
+        this._updateCellState(14, 10, true);
+        this._updateCellState(14, 11, true);
+        this._updateCellState(14, 12, true);
         break;
 
       case "glider":
-        this.cellStates[1][2] = true;
-        this.cellStates[2][3] = true;
-        this.cellStates[3][1] = true;
-        this.cellStates[3][2] = true;
-        this.cellStates[3][3] = true;
+        this._updateCellState(1, 2, true);
+        this._updateCellState(2, 3, true);
+        this._updateCellState(3, 1, true);
+        this._updateCellState(3, 2, true);
+        this._updateCellState(3, 3, true);
         break;
 
       case "blinker":
-        this.cellStates[1][2] = true;
-        this.cellStates[2][2] = true;
-        this.cellStates[3][2] = true;
+        this._updateCellState(1, 2, true);
+        this._updateCellState(2, 2, true);
+        this._updateCellState(3, 2, true);
         break;
     }
   }
 
   toggleCellState(rowIndex: number, colIndex: number) {
-    this.cellStates[rowIndex][colIndex] = !this.cellStates[rowIndex][colIndex];
+    this._updateCellState(
+      rowIndex,
+      colIndex,
+      !this.cellStates[rowIndex][colIndex]
+    );
   }
 
   tick() {
     const neighbourCounts: number[][] = [];
 
-    // count active neighbour cells for all cells first
-    for (let rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
-      neighbourCounts[rowIndex] = [];
+    const cellsToUpdate = this._calculateCellsToUpdate();
 
-      for (let colIndex = 0; colIndex < this.colCount; colIndex++) {
-        neighbourCounts[rowIndex][colIndex] = this._countActiveNeighbourCells(
-          rowIndex,
-          colIndex
-        );
+    this._updatedCells = [];
+
+    cellsToUpdate.forEach((cell) => {
+      if (neighbourCounts[cell.rowIndex] === undefined) {
+        neighbourCounts[cell.rowIndex] = [];
       }
-    }
+
+      neighbourCounts[cell.rowIndex][cell.colIndex] =
+        this._countActiveNeighbourCells(cell.rowIndex, cell.colIndex);
+    });
+
+    // reset updated cells index
+    this._updatedCells = [];
 
     // calculate state for next tick
-    for (let rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
-      for (let colIndex = 0; colIndex < this.colCount; colIndex++) {
-        this.cellStates[rowIndex][colIndex] = this._calculateNewCellState(
-          this.cellStates[rowIndex][colIndex],
-          neighbourCounts[rowIndex][colIndex]
-        );
-      }
-    }
+    cellsToUpdate.forEach((cell) => {
+      this._updateCellState(
+        cell.rowIndex,
+        cell.colIndex,
+        this._calculateNewCellState(
+          this.cellStates[cell.rowIndex][cell.colIndex],
+          neighbourCounts[cell.rowIndex][cell.colIndex]
+        )
+      );
+    });
   }
 }

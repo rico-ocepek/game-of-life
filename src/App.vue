@@ -14,6 +14,7 @@ const state = reactive<{
   tickNumber: 0,
   running: true,
   selectedPreset: null,
+  timeout: 50,
   presetOptions: [
     "glider",
     "glider-gun",
@@ -34,7 +35,7 @@ const tick = () => {
     game?.tick();
   }
 
-  setTimeout(tick, 100);
+  setTimeout(tick, state.timeout);
 };
 
 const toggleCellState = (rowIndex: number, colIndex: number) => {
