@@ -1,3 +1,11 @@
+import {
+  Pentadecathlon,
+  GliderGun,
+  Glider,
+  SymmetricalOscillator,
+  Blinker,
+} from "../data/Presets.ts";
+
 export type AvailablePresets =
   | "glider-gun"
   | "glider"
@@ -5,10 +13,7 @@ export type AvailablePresets =
   | "pentadecathlon"
   | "symmetrical-oscillator";
 
-export type CellIdentifier = {
-  rowIndex: number;
-  colIndex: number;
-};
+export type CellIdentifier = [number, number];
 
 export default class Game {
   rowCount: number;
@@ -52,33 +57,33 @@ export default class Game {
 
     this._updatedCells.forEach((cell) => {
       // update the cell itself
-      cellsToUpdate.add(cell.rowIndex + "|" + cell.colIndex);
+      cellsToUpdate.add(cell[0] + "|" + cell[1]);
 
       // and all neighbouring cells
       const adjacentBandIndices = this._getAdjacentBandIndices(
-        cell.rowIndex,
-        cell.colIndex
+        cell[0],
+        cell[1]
       );
 
-      cellsToUpdate.add(adjacentBandIndices.top + "|" + cell.colIndex);
+      cellsToUpdate.add(adjacentBandIndices.top + "|" + cell[1]);
 
       cellsToUpdate.add(
         adjacentBandIndices.top + "|" + adjacentBandIndices.right
       );
 
-      cellsToUpdate.add(cell.rowIndex + "|" + adjacentBandIndices.right);
+      cellsToUpdate.add(cell[0] + "|" + adjacentBandIndices.right);
 
       cellsToUpdate.add(
         adjacentBandIndices.bottom + "|" + adjacentBandIndices.right
       );
 
-      cellsToUpdate.add(adjacentBandIndices.bottom + "|" + cell.colIndex);
+      cellsToUpdate.add(adjacentBandIndices.bottom + "|" + cell[1]);
 
       cellsToUpdate.add(
         adjacentBandIndices.bottom + "|" + adjacentBandIndices.left
       );
 
-      cellsToUpdate.add(cell.rowIndex + "|" + adjacentBandIndices.left);
+      cellsToUpdate.add(cell[0] + "|" + adjacentBandIndices.left);
 
       cellsToUpdate.add(
         adjacentBandIndices.top + "|" + adjacentBandIndices.left
@@ -88,10 +93,7 @@ export default class Game {
     return [...cellsToUpdate].map((cellString) => {
       const cellCoordinates = cellString.split("|");
 
-      return {
-        rowIndex: parseInt(cellCoordinates[0]),
-        colIndex: parseInt(cellCoordinates[1]),
-      };
+      return [parseInt(cellCoordinates[0]), parseInt(cellCoordinates[1])];
     });
   }
 
@@ -210,10 +212,7 @@ export default class Game {
       return;
     }
 
-    this._updatedCells.push({
-      rowIndex,
-      colIndex,
-    });
+    this._updatedCells.push([rowIndex, colIndex]);
   }
 
   _persistHistory() {
@@ -231,150 +230,37 @@ export default class Game {
   loadPreset(preset: AvailablePresets) {
     this._initializeCells();
 
+    let template: CellIdentifier[] | null = null;
+
     switch (preset) {
       case "pentadecathlon":
-        this._updateCellState(5, 4, true);
-
-        this._updateCellState(6, 3, true);
-        this._updateCellState(6, 5, true);
-
-        this._updateCellState(7, 3, true);
-        this._updateCellState(7, 5, true);
-
-        this._updateCellState(8, 4, true);
-
-        this._updateCellState(9, 4, true);
-
-        this._updateCellState(10, 3, true);
-        this._updateCellState(10, 5, true);
-
-        this._updateCellState(11, 3, true);
-        this._updateCellState(11, 5, true);
-
-        this._updateCellState(12, 4, true);
+        template = Pentadecathlon;
         break;
 
       case "glider-gun":
-        this._updateCellState(1, 26, true);
-
-        this._updateCellState(2, 24, true);
-        this._updateCellState(2, 26, true);
-
-        this._updateCellState(3, 14, true);
-        this._updateCellState(3, 15, true);
-        this._updateCellState(3, 22, true);
-        this._updateCellState(3, 23, true);
-        this._updateCellState(3, 36, true);
-        this._updateCellState(3, 37, true);
-
-        this._updateCellState(4, 13, true);
-        this._updateCellState(4, 17, true);
-        this._updateCellState(4, 22, true);
-        this._updateCellState(4, 23, true);
-        this._updateCellState(4, 36, true);
-        this._updateCellState(4, 37, true);
-
-        this._updateCellState(5, 2, true);
-        this._updateCellState(5, 3, true);
-        this._updateCellState(5, 12, true);
-        this._updateCellState(5, 18, true);
-        this._updateCellState(5, 22, true);
-        this._updateCellState(5, 23, true);
-
-        this._updateCellState(6, 2, true);
-        this._updateCellState(6, 3, true);
-        this._updateCellState(6, 12, true);
-        this._updateCellState(6, 16, true);
-        this._updateCellState(6, 18, true);
-        this._updateCellState(6, 19, true);
-        this._updateCellState(6, 24, true);
-        this._updateCellState(6, 26, true);
-
-        this._updateCellState(7, 12, true);
-        this._updateCellState(7, 18, true);
-        this._updateCellState(7, 26, true);
-
-        this._updateCellState(8, 13, true);
-        this._updateCellState(8, 17, true);
-
-        this._updateCellState(9, 14, true);
-        this._updateCellState(9, 15, true);
+        template = GliderGun;
         break;
 
       case "symmetrical-oscillator":
-        this._updateCellState(2, 4, true);
-        this._updateCellState(2, 5, true);
-        this._updateCellState(2, 6, true);
-        this._updateCellState(2, 10, true);
-        this._updateCellState(2, 11, true);
-        this._updateCellState(2, 12, true);
-
-        this._updateCellState(4, 2, true);
-        this._updateCellState(4, 7, true);
-        this._updateCellState(4, 9, true);
-        this._updateCellState(4, 14, true);
-
-        this._updateCellState(5, 2, true);
-        this._updateCellState(5, 7, true);
-        this._updateCellState(5, 9, true);
-        this._updateCellState(5, 14, true);
-
-        this._updateCellState(6, 2, true);
-        this._updateCellState(6, 7, true);
-        this._updateCellState(6, 9, true);
-        this._updateCellState(6, 14, true);
-
-        this._updateCellState(7, 4, true);
-        this._updateCellState(7, 5, true);
-        this._updateCellState(7, 6, true);
-        this._updateCellState(7, 10, true);
-        this._updateCellState(7, 11, true);
-        this._updateCellState(7, 12, true);
-
-        this._updateCellState(9, 4, true);
-        this._updateCellState(9, 5, true);
-        this._updateCellState(9, 6, true);
-        this._updateCellState(9, 10, true);
-        this._updateCellState(9, 11, true);
-        this._updateCellState(9, 12, true);
-
-        this._updateCellState(10, 2, true);
-        this._updateCellState(10, 7, true);
-        this._updateCellState(10, 9, true);
-        this._updateCellState(10, 14, true);
-
-        this._updateCellState(11, 2, true);
-        this._updateCellState(11, 7, true);
-        this._updateCellState(11, 9, true);
-        this._updateCellState(11, 14, true);
-
-        this._updateCellState(12, 2, true);
-        this._updateCellState(12, 7, true);
-        this._updateCellState(12, 9, true);
-        this._updateCellState(12, 14, true);
-
-        this._updateCellState(14, 4, true);
-        this._updateCellState(14, 5, true);
-        this._updateCellState(14, 6, true);
-        this._updateCellState(14, 10, true);
-        this._updateCellState(14, 11, true);
-        this._updateCellState(14, 12, true);
+        template = SymmetricalOscillator;
         break;
 
       case "glider":
-        this._updateCellState(1, 2, true);
-        this._updateCellState(2, 3, true);
-        this._updateCellState(3, 1, true);
-        this._updateCellState(3, 2, true);
-        this._updateCellState(3, 3, true);
+        template = Glider;
         break;
 
       case "blinker":
-        this._updateCellState(1, 2, true);
-        this._updateCellState(2, 2, true);
-        this._updateCellState(3, 2, true);
+        template = Blinker;
         break;
     }
+
+    if (!template) {
+      return;
+    }
+
+    template.forEach((cellIdentifier) => {
+      this._updateCellState(cellIdentifier[0], cellIdentifier[1], true);
+    });
   }
 
   toggleCellState(rowIndex: number, colIndex: number) {
@@ -449,12 +335,14 @@ export default class Game {
     this._updatedCells = [];
 
     cellsToUpdate.forEach((cell) => {
-      if (neighbourCounts[cell.rowIndex] === undefined) {
-        neighbourCounts[cell.rowIndex] = [];
+      if (neighbourCounts[cell[0]] === undefined) {
+        neighbourCounts[cell[0]] = [];
       }
 
-      neighbourCounts[cell.rowIndex][cell.colIndex] =
-        this._countActiveNeighbourCells(cell.rowIndex, cell.colIndex);
+      neighbourCounts[cell[0]][cell[1]] = this._countActiveNeighbourCells(
+        cell[0],
+        cell[1]
+      );
     });
 
     // reset updated cells index
@@ -463,11 +351,11 @@ export default class Game {
     // calculate state for next tick
     cellsToUpdate.forEach((cell) => {
       this._updateCellState(
-        cell.rowIndex,
-        cell.colIndex,
+        cell[0],
+        cell[1],
         this._calculateNewCellState(
-          this.cellStates[cell.rowIndex][cell.colIndex],
-          neighbourCounts[cell.rowIndex][cell.colIndex]
+          this.cellStates[cell[0]][cell[1]],
+          neighbourCounts[cell[0]][cell[1]]
         )
       );
     });
