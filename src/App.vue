@@ -3,6 +3,11 @@ import { onMounted, reactive } from "vue";
 
 import Game, { type AvailablePresets } from "./classes/Game";
 
+import IconsBackward from "./components/icons/Backward.vue";
+import IconsForward from "./components/icons/Forward.vue";
+import IconsPause from "./components/icons/Pause.vue";
+import IconsPlay from "./components/icons/Play.vue";
+
 let game: Game | null = null;
 
 const state = reactive<{
@@ -13,7 +18,7 @@ const state = reactive<{
   presetOptions: AvailablePresets[];
 }>({
   tickNumber: 0,
-  running: true,
+  running: false,
   selectedPreset: null,
   timeout: 50,
   presetOptions: [
@@ -25,18 +30,43 @@ const state = reactive<{
   ],
 });
 
+const canUntick = () => {
+  return game?.canUntick();
+};
+
 const redraw = () => {
+  // this is not really a "tick" but the only way to re-render currently
   state.tickNumber++;
 };
 
 const tick = () => {
-  if (state.running) {
-    state.tickNumber++;
+  state.tickNumber++;
 
-    game?.tick();
+  game?.tick();
+};
+
+const untick = () => {
+  state.tickNumber--;
+
+  game?.untick();
+};
+
+const autoTick = () => {
+  if (!state.running) {
+    return;
   }
 
-  setTimeout(tick, state.timeout);
+  tick();
+
+  setTimeout(autoTick, state.timeout);
+};
+
+const toggleRunning = () => {
+  state.running = !state.running;
+
+  if (state.running) {
+    autoTick();
+  }
 };
 
 const toggleCellState = (rowIndex: number, colIndex: number) => {
@@ -52,7 +82,7 @@ const selectPreset = () => {
 
   state.selectedPreset = null;
 
-  redraw();
+  tick();
 };
 
 onMounted(() => {
@@ -63,6 +93,28 @@ onMounted(() => {
 </script>
 
 <template>
+  <div
+    class="fixed border px-4 py-2 rounded-lg border-neutral-400 bottom-4 left-4 bg-white/40"
+  >
+    <h1 class="text-xl font-bold">Debug info</h1>
+
+    <p>Tick: {{ state.tickNumber }}</p>
+
+    <p>History length: {{ game?._history.length }}</p>
+
+    <p>History cursor position: {{ game?._historyCursorPosition }}</p>
+
+    <p>
+      Last history entry for 0/0:
+
+      {{
+        game?._history[game?._history.length - 1].cellStates[0][0]
+          ? "true"
+          : "false"
+      }}
+    </p>
+  </div>
+
   <div class="container mx-auto text-center px-4 pt-20 pb-10">
     <div class="flex items-center justify-center gap-4">
       <select
@@ -82,10 +134,27 @@ onMounted(() => {
       </select>
 
       <button
-        class="bg-neutral-200 px-4 py-2 rounded-lg cursor-pointer"
-        @click="state.running = !state.running"
+        class="bg-neutral-200 px-4 py-2 rounded-lg cursor-pointer active:bg-neutral-300"
+        :class="canUntick() ? '' : 'opacity-50'"
+        :disabled="!canUntick()"
+        @click="untick"
       >
-        {{ state.running ? "Pause" : "Resume" }}
+        <IconsBackward />
+      </button>
+
+      <button
+        class="bg-neutral-200 px-4 py-2 rounded-lg cursor-pointer active:bg-neutral-300"
+        @click="toggleRunning"
+      >
+        <IconsPause v-if="state.running" />
+        <IconsPlay v-else />
+      </button>
+
+      <button
+        class="bg-neutral-200 px-4 py-2 rounded-lg cursor-pointer active:bg-neutral-300"
+        @click="tick"
+      >
+        <IconsForward />
       </button>
     </div>
   </div>

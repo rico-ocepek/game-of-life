@@ -18,7 +18,20 @@ export default class Game {
 
   _updatedCells: CellIdentifier[];
 
+  _historySize: number;
+
+  _history: {
+    cellStates: boolean[][];
+    updatedCells: CellIdentifier[];
+  }[];
+
+  _historyCursor: number;
+
   constructor(rowCount: number, colCount: number) {
+    this._historySize = 50;
+    this._historyCursor = 0;
+    this._history = [];
+
     this.rowCount = rowCount;
     this.colCount = colCount;
 
@@ -31,6 +44,7 @@ export default class Game {
   _initializeCells() {
     this.cellStates = [];
     this._updatedCells = [];
+    this._history = [];
 
     for (let i = 0; i < this.rowCount; i++) {
       this.cellStates[i] = [];
@@ -210,6 +224,18 @@ export default class Game {
     });
   }
 
+  _persistHistory() {
+    if (this._history.length >= this._historySize) {
+      // if history is full, remove first entry
+      this._history.splice(0, 1);
+    }
+
+    this._history.push({
+      cellStates: structuredClone(this.cellStates),
+      updatedCells: structuredClone(this._updatedCells),
+    });
+  }
+
   loadPreset(preset: AvailablePresets) {
     this._initializeCells();
 
@@ -367,7 +393,25 @@ export default class Game {
     );
   }
 
+  canUntick() {
+    return this._history.length > 0;
+  }
+
+  untick() {
+    const lastHistoryEntry = this._history.pop();
+
+    if (!lastHistoryEntry) {
+      return;
+    }
+
+    // not cloning them as the history entry is removed anyways
+    this.cellStates = lastHistoryEntry.cellStates;
+    this._updatedCells = lastHistoryEntry.updatedCells;
+  }
+
   tick() {
+    this._persistHistory();
+
     const neighbourCounts: number[][] = [];
 
     const cellsToUpdate = this._calculateCellsToUpdate();
