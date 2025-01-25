@@ -4,11 +4,13 @@ import {
   Glider,
   SymmetricalOscillator,
   Blinker,
+  GliderArmy,
 } from "../data/Presets.ts";
 
 export type AvailablePresets =
   | "glider-gun"
   | "glider"
+  | "glider-army"
   | "blinker"
   | "pentadecathlon"
   | "symmetrical-oscillator";
@@ -247,6 +249,10 @@ export default class Game {
 
       case "glider":
         template = Glider;
+        break;
+
+      case "glider-army":
+        template = GliderArmy;
         break;
 
       case "blinker":

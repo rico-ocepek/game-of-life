@@ -24,6 +24,7 @@ const state = reactive<{
   presetOptions: [
     "glider",
     "glider-gun",
+    "glider-army",
     "blinker",
     "pentadecathlon",
     "symmetrical-oscillator",
