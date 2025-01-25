@@ -98,6 +98,22 @@ onMounted(() => {
 
     <p>Tick: {{ state.tickNumber }}</p>
 
+    <p>Fields: {{ (game?.rowCount ?? 0) * (game?.colCount ?? 0) }}</p>
+
+    <p>Updated fields: {{ game?._updatedCells.length }}</p>
+
+    <p>
+      Updated:
+      {{
+        (
+          ((game?._updatedCells.length ?? 0) /
+            ((game?.rowCount ?? 1) * (game?.colCount ?? 1))) *
+          100
+        ).toPrecision(2)
+      }}
+      %
+    </p>
+
     <p>History length: {{ game?._history.length }}</p>
 
     <p>History cursor position: {{ game?._historyCursorPosition }}</p>
