@@ -14,29 +14,21 @@ export default class Game {
   rowCount: number;
   colCount: number;
 
-  cellStates: boolean[][];
+  cellStates: boolean[][] = [];
 
-  _updatedCells: CellIdentifier[];
+  _updatedCells: CellIdentifier[] = [];
 
-  _historySize: number;
+  _historySize: number = 100;
+  _historyCursorPosition: number = 0;
 
   _history: {
     cellStates: boolean[][];
     updatedCells: CellIdentifier[];
-  }[];
-
-  _historyCursor: number;
+  }[] = [];
 
   constructor(rowCount: number, colCount: number) {
-    this._historySize = 50;
-    this._historyCursor = 0;
-    this._history = [];
-
     this.rowCount = rowCount;
     this.colCount = colCount;
-
-    this.cellStates = [];
-    this._updatedCells = [];
 
     this._initializeCells();
   }
@@ -394,22 +386,60 @@ export default class Game {
   }
 
   canUntick() {
-    return this._history.length > 0;
+    return (
+      this._history.length > 0 &&
+      this._history.length > Math.abs(this._historyCursorPosition)
+    );
+  }
+
+  _restoreHistoryEntry(cursorDelta: number) {
+    const historyIndex =
+      this._history.length - 1 + this._historyCursorPosition + cursorDelta;
+
+    if (historyIndex >= this._history.length) {
+      console.warn("Selected history index to large");
+
+      return false;
+    } else if (historyIndex < 0) {
+      console.warn("Selected history index < 0");
+
+      return false;
+    }
+
+    const selectedHistoryEntry = this._history[historyIndex];
+
+    if (!selectedHistoryEntry) {
+      console.warn("No history entry found at index");
+
+      return false;
+    }
+
+    this.cellStates = structuredClone(selectedHistoryEntry.cellStates);
+    this._updatedCells = structuredClone(selectedHistoryEntry.updatedCells);
+
+    this._historyCursorPosition += cursorDelta;
+
+    return true;
   }
 
   untick() {
-    const lastHistoryEntry = this._history.pop();
+    if (!this.canUntick()) {
+      console.info("No more history entries to undo");
 
-    if (!lastHistoryEntry) {
       return;
     }
 
-    // not cloning them as the history entry is removed anyways
-    this.cellStates = lastHistoryEntry.cellStates;
-    this._updatedCells = lastHistoryEntry.updatedCells;
+    this._restoreHistoryEntry(-1);
   }
 
   tick() {
+    // if restoreHistoryEntry returns false it failed
+    if (this._historyCursorPosition < 0 && this._restoreHistoryEntry(1)) {
+      console.info("Using history, skipping calculations");
+
+      return;
+    }
+
     this._persistHistory();
 
     const neighbourCounts: number[][] = [];

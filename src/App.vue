@@ -81,8 +81,6 @@ const selectPreset = () => {
   game?.loadPreset(state.selectedPreset);
 
   state.selectedPreset = null;
-
-  tick();
 };
 
 onMounted(() => {
@@ -108,7 +106,7 @@ onMounted(() => {
       Last history entry for 0/0:
 
       {{
-        game?._history[game?._history.length - 1].cellStates[0][0]
+        game?._history[game?._history.length - 1]?.cellStates[0][0]
           ? "true"
           : "false"
       }}
@@ -136,7 +134,6 @@ onMounted(() => {
       <button
         class="bg-neutral-200 px-4 py-2 rounded-lg cursor-pointer active:bg-neutral-300"
         :class="canUntick() ? '' : 'opacity-50'"
-        :disabled="!canUntick()"
         @click="untick"
       >
         <IconsBackward />
