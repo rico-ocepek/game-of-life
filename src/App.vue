@@ -85,7 +85,7 @@ const selectPreset = () => {
 };
 
 onMounted(() => {
-  game = new Game(40, 50);
+  game = new Game(80, 100);
 
   tick();
 });
