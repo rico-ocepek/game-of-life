@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from "vue";
+import { onMounted, reactive, computed } from "vue";
 
 import Game, { type AvailablePresets } from "./classes/Game";
 
@@ -26,7 +26,7 @@ const state = reactive<{
 
   running: false,
   selectedPreset: null,
-  timeout: 50,
+  timeout: 30,
   presetOptions: [
     "glider",
     "glider-gun",
@@ -35,6 +35,19 @@ const state = reactive<{
     "pentadecathlon",
     "symmetrical-oscillator",
   ],
+});
+
+const timeoutOptions = computed(() => {
+  const baseline = 30;
+
+  return [
+    { label: "0.25x", value: baseline / 0.25 },
+    { label: "0.5x", value: baseline / 0.5 },
+    { label: "1x", value: baseline },
+    { label: "2x", value: baseline / 2 },
+    { label: "5x", value: baseline / 5 },
+    { label: "10x", value: baseline / 10 },
+  ];
 });
 
 const canUntick = () => {
@@ -133,6 +146,19 @@ onMounted(() => {
 
   <div class="container mx-auto text-center px-4 pt-20 pb-10">
     <div class="flex items-center justify-center gap-4">
+      <select
+        v-model="state.timeout"
+        class="border-neutral-200 outline-none border cursor-pointer px-4 py-2 rounded-lg appearance-none"
+      >
+        <option
+          v-for="option in timeoutOptions"
+          :key="option.value"
+          :value="option.value"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+
       <select
         class="border-neutral-200 outline-none border cursor-pointer px-4 py-2 rounded-lg appearance-none"
         v-model="state.selectedPreset"
