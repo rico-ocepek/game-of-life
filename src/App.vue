@@ -11,13 +11,19 @@ import IconsPlay from "./components/icons/Play.vue";
 let game: Game | null = null;
 
 const state = reactive<{
-  tickNumber: number;
+  gameState: {
+    cellStates: boolean[][] | null;
+  };
+
   running: boolean;
   selectedPreset: AvailablePresets | null;
   timeout: number;
   presetOptions: AvailablePresets[];
 }>({
-  tickNumber: 0,
+  gameState: {
+    cellStates: null,
+  },
+
   running: false,
   selectedPreset: null,
   timeout: 50,
@@ -35,20 +41,11 @@ const canUntick = () => {
   return game?.canUntick();
 };
 
-const redraw = () => {
-  // this is not really a "tick" but the only way to re-render currently
-  state.tickNumber++;
-};
-
 const tick = () => {
-  state.tickNumber++;
-
   game?.tick();
 };
 
 const untick = () => {
-  state.tickNumber--;
-
   game?.untick();
 };
 
@@ -62,6 +59,14 @@ const autoTick = () => {
   setTimeout(autoTick, state.timeout);
 };
 
+const renderLoop = () => {
+  if (game) {
+    state.gameState.cellStates = game.getCurrentCellStates();
+  }
+
+  requestAnimationFrame(renderLoop);
+};
+
 const toggleRunning = () => {
   state.running = !state.running;
 
@@ -72,8 +77,6 @@ const toggleRunning = () => {
 
 const toggleCellState = (rowIndex: number, colIndex: number) => {
   game?.toggleCellState(rowIndex, colIndex);
-
-  redraw();
 };
 
 const selectPreset = () => {
@@ -87,7 +90,7 @@ const selectPreset = () => {
 onMounted(() => {
   game = new Game(80, 100);
 
-  tick();
+  renderLoop();
 });
 </script>
 
@@ -96,8 +99,6 @@ onMounted(() => {
     class="fixed border px-4 py-2 rounded-lg border-neutral-400 bottom-4 left-4 bg-white/40"
   >
     <h1 class="text-xl font-bold">Debug info</h1>
-
-    <p>Tick: {{ state.tickNumber }}</p>
 
     <p>Fields: {{ (game?.rowCount ?? 0) * (game?.colCount ?? 0) }}</p>
 
@@ -173,9 +174,9 @@ onMounted(() => {
     </div>
   </div>
 
-  <div :key="state.tickNumber" class="flex flex-col gap-y-0.5">
+  <div class="flex flex-col gap-y-0.5">
     <div
-      v-for="(row, rowIndex) in game?.cellStates"
+      v-for="(row, rowIndex) in state.gameState.cellStates"
       class="flex flex-grow gap-x-0.5"
     >
       <div

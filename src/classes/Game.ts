@@ -21,7 +21,7 @@ export default class Game {
   rowCount: number;
   colCount: number;
 
-  cellStates: boolean[][] = [];
+  _cellStates: boolean[][] = [];
 
   _updatedCells: CellIdentifier[] = [];
 
@@ -41,15 +41,15 @@ export default class Game {
   }
 
   _initializeCells() {
-    this.cellStates = [];
+    this._cellStates = [];
     this._updatedCells = [];
     this._history = [];
 
     for (let i = 0; i < this.rowCount; i++) {
-      this.cellStates[i] = [];
+      this._cellStates[i] = [];
 
       for (let j = 0; j < this.colCount; j++) {
-        this.cellStates[i][j] = false;
+        this._cellStates[i][j] = false;
       }
     }
   }
@@ -131,44 +131,46 @@ export default class Game {
     );
 
     // check top neighbour
-    if (this.cellStates[adjacentBandIndices.top][colIndex]) {
+    if (this._cellStates[adjacentBandIndices.top][colIndex]) {
       activeNeighbours++;
     }
 
     // check top-right neighbour
-    if (this.cellStates[adjacentBandIndices.top][adjacentBandIndices.right]) {
+    if (this._cellStates[adjacentBandIndices.top][adjacentBandIndices.right]) {
       activeNeighbours++;
     }
 
     // check right neighbour
-    if (this.cellStates[rowIndex][adjacentBandIndices.right]) {
+    if (this._cellStates[rowIndex][adjacentBandIndices.right]) {
       activeNeighbours++;
     }
 
     // check bottom-right neighbour
     if (
-      this.cellStates[adjacentBandIndices.bottom][adjacentBandIndices.right]
+      this._cellStates[adjacentBandIndices.bottom][adjacentBandIndices.right]
     ) {
       activeNeighbours++;
     }
 
     // check bottom neighbour
-    if (this.cellStates[adjacentBandIndices.bottom][colIndex]) {
+    if (this._cellStates[adjacentBandIndices.bottom][colIndex]) {
       activeNeighbours++;
     }
 
     // check bottom-left neighbour
-    if (this.cellStates[adjacentBandIndices.bottom][adjacentBandIndices.left]) {
+    if (
+      this._cellStates[adjacentBandIndices.bottom][adjacentBandIndices.left]
+    ) {
       activeNeighbours++;
     }
 
     // check left neighbour
-    if (this.cellStates[rowIndex][adjacentBandIndices.left]) {
+    if (this._cellStates[rowIndex][adjacentBandIndices.left]) {
       activeNeighbours++;
     }
 
     // check top-left neighbour
-    if (this.cellStates[adjacentBandIndices.top][adjacentBandIndices.left]) {
+    if (this._cellStates[adjacentBandIndices.top][adjacentBandIndices.left]) {
       activeNeighbours++;
     }
 
@@ -206,9 +208,9 @@ export default class Game {
   }
 
   _updateCellState(rowIndex: number, colIndex: number, newState: boolean) {
-    const oldState = this.cellStates[rowIndex][colIndex];
+    const oldState = this._cellStates[rowIndex][colIndex];
 
-    this.cellStates[rowIndex][colIndex] = newState;
+    this._cellStates[rowIndex][colIndex] = newState;
 
     if (oldState === newState) {
       return;
@@ -224,7 +226,7 @@ export default class Game {
     }
 
     this._history.push({
-      cellStates: structuredClone(this.cellStates),
+      cellStates: structuredClone(this._cellStates),
       updatedCells: structuredClone(this._updatedCells),
     });
   }
@@ -273,7 +275,7 @@ export default class Game {
     this._updateCellState(
       rowIndex,
       colIndex,
-      !this.cellStates[rowIndex][colIndex]
+      !this._cellStates[rowIndex][colIndex]
     );
   }
 
@@ -306,7 +308,7 @@ export default class Game {
       return false;
     }
 
-    this.cellStates = structuredClone(selectedHistoryEntry.cellStates);
+    this._cellStates = structuredClone(selectedHistoryEntry.cellStates);
     this._updatedCells = structuredClone(selectedHistoryEntry.updatedCells);
 
     this._historyCursorPosition += cursorDelta;
@@ -360,10 +362,14 @@ export default class Game {
         cell[0],
         cell[1],
         this._calculateNewCellState(
-          this.cellStates[cell[0]][cell[1]],
+          this._cellStates[cell[0]][cell[1]],
           neighbourCounts[cell[0]][cell[1]]
         )
       );
     });
+  }
+
+  getCurrentCellStates() {
+    return structuredClone(this._cellStates);
   }
 }
